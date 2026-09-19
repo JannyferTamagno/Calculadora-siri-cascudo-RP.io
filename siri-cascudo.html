@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comanda do Siri Cascudo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sea-top: #1aa0d8;
+    --sea-bottom: #06395c;
+    --wood: #8a5a2b;
+    --wood-dark: #5a3717;
+    --wood-light: #b97f3e;
+    --paper: #fff3d1;
+    --ink: #3a2410;
+    --red: #d8341c;
+    --red-dark: #a32210;
+    --yellow: #ffd23f;
+    --font: "Lilita One", "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 20px 14px 40px;
+    font-family: var(--font);
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 12% 18%, rgba(255,255,255,.18) 0 10px, transparent 11px),
+      radial-gradient(circle at 85% 30%, rgba(255,255,255,.14) 0 16px, transparent 17px),
+      radial-gradient(circle at 70% 78%, rgba(255,255,255,.12) 0 8px, transparent 9px),
+      radial-gradient(circle at 20% 85%, rgba(255,255,255,.14) 0 13px, transparent 14px),
+      linear-gradient(var(--sea-top), var(--sea-bottom));
+    background-attachment: fixed;
+  }
+  .wrap { max-width: 520px; margin: 0 auto; }
+
+  /* Placa de madeira */
+  .sign {
+    text-align: center;
+    padding: 16px 12px 14px;
+    border: 5px solid var(--wood-dark);
+    border-radius: 16px;
+    background: repeating-linear-gradient(180deg, var(--wood-light) 0 34px, var(--wood-dark) 34px 37px);
+    box-shadow: 0 6px 0 rgba(0,0,0,.25);
+  }
+  .sign h1 {
+    margin: 0;
+    font-weight: 400;
+    font-size: 2.3rem;
+    letter-spacing: .5px;
+    color: var(--yellow);
+    text-shadow:
+      2px 2px 0 var(--red-dark), -2px -2px 0 var(--red-dark),
+      2px -2px 0 var(--red-dark), -2px 2px 0 var(--red-dark),
+      0 4px 0 var(--red-dark);
+  }
+  .sign p {
+    margin: 6px 0 0;
+    color: var(--paper);
+    font-size: 1.05rem;
+    text-shadow: 1px 1px 0 var(--wood-dark);
+  }
+
+  /* Comanda (papel) */
+  .card {
+    margin-top: 18px;
+    background: var(--paper);
+    border: 5px solid var(--wood-dark);
+    border-radius: 18px;
+    padding: 8px 14px 16px;
+    box-shadow: 0 6px 0 rgba(0,0,0,.25);
+  }
+  .card h2 {
+    margin: 10px 0 4px;
+    font-weight: 400;
+    font-size: 1.25rem;
+    color: var(--red-dark);
+  }
+  .list { list-style: none; margin: 0; padding: 0; }
+  .item {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 2px dashed rgba(90,55,23,.35);
+  }
+  .emoji { font-size: 1.9rem; text-align: center; }
+  .name {
+    font-size: 1.15rem;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .unit { font-size: .85rem; opacity: .75; font-variant-numeric: tabular-nums; }
+  .sub { font-size: .95rem; color: var(--red-dark); min-height: 1.2em; font-variant-numeric: tabular-nums; }
+
+  .stepper { display: flex; align-items: center; gap: 8px; }
+  .btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 3px solid var(--wood-dark);
+    background: var(--yellow);
+    color: var(--wood-dark);
+    font: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--wood-dark);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn.minus { background: #fff; }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--wood-dark); }
+  .qty { min-width: 26px; text-align: center; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+
+  /* Total */
+  .total {
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: var(--red);
+    border: 4px solid var(--red-dark);
+    border-radius: 14px;
+    padding: 12px 16px;
+    color: var(--yellow);
+  }
+  .total .label { font-size: 1.5rem; }
+  .total .count { display: block; font-size: .85rem; color: #ffe9a6; }
+  .amount {
+    font-size: 2.1rem;
+    text-shadow: 2px 2px 0 var(--red-dark);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .pop { animation: pop .25s ease; }
+  @keyframes pop { 50% { transform: scale(1.12); } }
+  @media (prefers-reduced-motion: reduce) { .pop { animation: none; } }
+
+  .reset {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px;
+    border: 3px solid var(--wood-dark);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--wood-dark);
+    font: inherit;
+    font-size: 1.05rem;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--wood-dark);
+  }
+  .reset:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--wood-dark); }
+
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="sign">
+      <h1>⚓ Siri Cascudo ⚓</h1>
+      <p>Comanda do dia</p>
+    </header>
+
+    <section class="card">
+      <ul class="list" id="list"></ul>
+
+      <div class="total">
+        <div>
+          <span class="label">Total</span>
+          <span class="count" id="count">0 itens</span>
+        </div>
+        <div class="amount" id="total">$ 0</div>
+      </div>
+      <button class="reset" id="reset" type="button">Zerar quantidades</button>
+    </section>
+  </div>
+
+<script>
+(function () {
+  var KEY = 'siri-cascudo-v2';
+  var defaults = [
+    { id: 1, name: 'Combo pequeno', price: 1500,  emoji: '🍔', qty: 0 },
+    { id: 2, name: 'Combo médio',   price: 2000,  emoji: '🍔', qty: 0 },
+    { id: 3, name: 'Combo grande',  price: 3000,  emoji: '🍔', qty: 0 },
+    { id: 4, name: 'Mamadeira',     price: 750,   emoji: '🍼', qty: 0 },
+    { id: 5, name: 'Raspadinha',    price: 20000, emoji: '🎫', qty: 0 }
+  ];
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return null;
+      var arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr.length && arr.every(function (x) {
+        return x && typeof x.name === 'string' && typeof x.price === 'number';
+      })) {
+        return arr.map(function (x, i) {
+          return {
+            id: x.id || i + 1,
+            name: x.name,
+            price: x.price,
+            emoji: x.emoji || '🍽️',
+            qty: Math.max(0, x.qty | 0)
+          };
+        });
+      }
+    } catch (e) {}
+    return null;
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(items)); } catch (e) {}
+  }
+
+  var items = load() || defaults.map(function (x) { return Object.assign({}, x); });
+
+  function money(n) {
+    n = Math.round(n * 100) / 100;
+    var hasDec = !Number.isInteger(n);
+    return '$ ' + n.toLocaleString('pt-BR', {
+      minimumFractionDigits: hasDec ? 2 : 0,
+      maximumFractionDigits: 2
+    });
+  }
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  var listEl = document.getElementById('list');
+  var totalEl = document.getElementById('total');
+  var countEl = document.getElementById('count');
+  var lastTotal = null;
+
+  function render() {
+    listEl.textContent = '';
+    items.forEach(function (it) {
+      var li = el('li', 'item');
+      li.appendChild(el('div', 'emoji', it.emoji));
+
+      var info = el('div', 'info');
+      var name = el('div', 'name', it.name);
+      info.appendChild(name);
+      info.appendChild(el('div', 'unit', money(it.price) + ' cada'));
+      info.appendChild(el('div', 'sub', it.qty > 0 ? 'Subtotal: ' + money(it.qty * it.price) : ''));
+      li.appendChild(info);
+
+      var st = el('div', 'stepper');
+      var minus = el('button', 'btn minus', '−');
+      minus.type = 'button';
+      minus.setAttribute('aria-label', 'Tirar um ' + it.name);
+      minus.addEventListener('click', function () {
+        if (it.qty > 0) { it.qty--; save(); render(); }
+      });
+      var qty = el('span', 'qty', String(it.qty));
+      var plus = el('button', 'btn plus', '+');
+      plus.type = 'button';
+      plus.setAttribute('aria-label', 'Adicionar um ' + it.name);
+      plus.addEventListener('click', function () {
+        it.qty++; save(); render();
+      });
+      st.appendChild(minus); st.appendChild(qty); st.appendChild(plus);
+      li.appendChild(st);
+
+      listEl.appendChild(li);
+    });
+
+    var total = items.reduce(function (s, x) { return s + x.qty * x.price; }, 0);
+    var count = items.reduce(function (s, x) { return s + x.qty; }, 0);
+    var txt = money(total);
+    totalEl.textContent = txt;
+    countEl.textContent = count + (count === 1 ? ' item' : ' itens');
+    if (lastTotal !== null && lastTotal !== txt) {
+      totalEl.classList.remove('pop');
+      void totalEl.offsetWidth;
+      totalEl.classList.add('pop');
+    }
+    lastTotal = txt;
+  }
+
+  document.getElementById('reset').addEventListener('click', function () {
+    items.forEach(function (x) { x.qty = 0; });
+    save(); render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
